@@ -46,22 +46,37 @@ function App() {
   const handleVoiceSearch = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert('Voice search is not supported in this browser. Please use Chrome!');
+      alert('Please use Chrome browser for voice search!');
       return;
     }
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-IN';
     recognition.interimResults = false;
-    recognition.start();
-    alert('🎤 Listening... Speak now!');
+    recognition.maxAlternatives = 1;
+    recognition.onstart = () => {
+      setQuery('🎤 Listening...');
+    };
     recognition.onresult = (e) => {
       const spoken = e.results[0][0].transcript;
       setQuery(spoken);
       handleSearch(spoken);
     };
     recognition.onerror = (e) => {
-      alert('Mic error: ' + e.error + '. Please allow microphone access!');
+      setQuery('');
+      if (e.error === 'not-allowed') {
+        alert('Microphone blocked! Go to Chrome Settings → Site Settings → Microphone → Allow for this site!');
+      } else {
+        alert('Voice error: ' + e.error);
+      }
     };
+    recognition.onend = () => {
+      if (query === '🎤 Listening...') setQuery('');
+    };
+    try {
+      recognition.start();
+    } catch(e) {
+      alert('Could not start microphone. Please try again!');
+    }
   };
 
   const handleImageSearch = async (e) => {
