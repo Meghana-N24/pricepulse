@@ -69,3 +69,9 @@ app.post('/image-search', async (req, res) => {
 app.listen(process.env.PORT || 5000, () => {
   console.log(`Server running on port ${process.env.PORT || 5000}`);
 });
+// Keep alive - ping every 14 minutes
+setInterval(() => {
+  axios.get('https://pricepulse-backend-cujs.onrender.com/health')
+    .then(() => console.log('Server kept alive'))
+    .catch(() => console.log('Keep alive ping failed'));
+}, 14 * 60 * 1000);
