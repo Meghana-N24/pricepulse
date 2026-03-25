@@ -1,0 +1,5 @@
+*.deb
+*.exe
+*.dmg
+node_modules
+.env
