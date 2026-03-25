@@ -5,13 +5,18 @@ require('dotenv').config();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'alive' });
+});
+
+// Product search
 app.get('/search', async (req, res) => {
   const { query } = req.query;
-
   try {
-   const response = await axios.get('https://real-time-product-search.p.rapidapi.com/search-v2', {
+    const response = await axios.get('https://real-time-product-search.p.rapidapi.com/search-v2', {
       params: {
         q: query,
         country: 'in',
@@ -27,7 +32,6 @@ app.get('/search', async (req, res) => {
         'x-rapidapi-host': 'real-time-product-search.p.rapidapi.com'
       }
     });
-
     res.json(response.data);
   } catch (error) {
     console.error(error.response ? error.response.data : error.message);
@@ -35,10 +39,7 @@ app.get('/search', async (req, res) => {
   }
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server running on port ${process.env.PORT}`);
-});
-
+// Image search
 app.post('/image-search', async (req, res) => {
   const { base64, mediaType } = req.body;
   try {
@@ -65,4 +66,8 @@ app.post('/image-search', async (req, res) => {
     console.error(err.response?.data || err.message);
     res.status(500).json({ error: 'Image search failed' });
   }
+});
+
+app.listen(process.env.PORT || 5000, () => {
+  console.log(`Server running on port ${process.env.PORT || 5000}`);
 });
