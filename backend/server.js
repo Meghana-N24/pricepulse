@@ -62,9 +62,9 @@ app.post('/image-search', async (req, res) => {
     });
     const product = response.data.content[0].text;
     res.json({ product });
-  } catch (err) {
+  }  catch (err) {
     console.error(err.response?.data || err.message);
-    res.status(500).json({ error: 'Image search failed' });
+    res.status(500).json({ error: err.response?.data || err.message });
   }
 });
 
