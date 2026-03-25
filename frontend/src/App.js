@@ -54,6 +54,40 @@ function App() {
       handleSearch(spoken);
     };
   };
+  const handleImageSearch = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  setLoading(true);
+  setSearched(true);
+
+  const reader = new FileReader();
+  reader.onloadend = async () => {
+    const base64 = reader.result.split(',')[1];
+    try {
+      const response = await axios.post('https://api.anthropic.com/v1/messages', {
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 100,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: file.type, data: base64 } },
+            { type: 'text', text: 'What product is in this image? Reply with just the product name in 3-5 words, nothing else.' }
+          ]
+        }]
+      }, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const detectedProduct = response.data.content[0].text;
+      setQuery(detectedProduct);
+      handleSearch(detectedProduct);
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
+  };
+  reader.readAsDataURL(file);
+};
 
   const medals = ['🥇', '🥈', '🥉'];
 
@@ -87,6 +121,10 @@ function App() {
           title="Voice Search">
           🎤
         </button>
+        <label style={{ padding: '14px 18px', borderRadius: '30px', background: theme.accent, color: 'white', border: 'none', fontSize: '1.2rem', cursor: 'pointer' }} title="Image Search">
+  📸
+  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageSearch} />
+</label>
       </div>
 
       {/* Loading */}
